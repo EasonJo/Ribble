@@ -27,8 +27,9 @@ public abstract class BaseMVPActivity<V extends BaseMVPContract.View, P extends 
             isPresenterCreated = true;
         }
         presenter = viewModel.getPresenter();
+        //用于监听 Activity 的 Lifecycle
         presenter.attachLifecycle(getLifecycle());
-        presenter.attachView((V) this);
+        presenter.attachView((V) this);//完美的封装设计,第二重保障.
         if (isPresenterCreated)
             presenter.onPresenterCreate();
     }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.CallSuper;
 
 /**
+ * 此 Presenter 实现了LifecycleObserver,可以监控 Activity 和 Fragment 的生命周期
  * Created by Chatikyan on 20.05.2017.
  */
 
@@ -48,8 +49,8 @@ public abstract class BaseMVPPresenter<V extends BaseMVPContract.View> implement
     @Override
     final public Bundle getStateBundle() {
         return stateBundle == null
-                ? stateBundle = new Bundle()
-                : stateBundle;
+            ? stateBundle = new Bundle()
+            : stateBundle;
     }
 
     @CallSuper

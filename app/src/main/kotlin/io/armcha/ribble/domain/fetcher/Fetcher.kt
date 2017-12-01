@@ -11,6 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Rxjava 的具体操作类,其中用 Map 记录了某种类型的上一次请求结果,所有的被观察者都在 IO 线程运行,结果则反馈给主线程执行.
  * Created by Chatikyan on 04.08.2017.
  */
 @Singleton
@@ -48,7 +49,7 @@ class Fetcher @Inject constructor(private val disposable: CompositeDisposable) {
     fun <T> fetch(single: Single<T>, requestType: RequestType,
                   resultListener: ResultListener, success: (T) -> Unit) {
         disposable.add(single
-                .compose(getIOToMainTransformer())
+                .compose(getIOToMainTransformer()) //TODO 没搞懂,为什么不直接在这里指定线程
                 .doOnSubscribe { resultListener startAndAdd requestType }
                 .subscribe(onSuccess<T>(requestType, success),
                         resultListener.onError(requestType)))
@@ -66,7 +67,12 @@ class Fetcher @Inject constructor(private val disposable: CompositeDisposable) {
                 }, resultListener.onError(requestType)))
     }
 
+    /**
+     * 在开始请求时,记录当前的请求类型,并标记类型为 Loading
+     * 采用扩展函数,并使用 infix 标记为中缀表示法.
+     */
     private infix fun ResultListener.startAndAdd(requestType: RequestType) {
+        //Callback 请求开始
         onRequestStart(requestType)
         if (requestType != RequestType.TYPE_NONE)
             requestMap.put(requestType, Status.LOADING)
@@ -79,6 +85,9 @@ class Fetcher @Inject constructor(private val disposable: CompositeDisposable) {
         }
     }
 
+    /**
+     * 回调数据结果,并且更新请求状态.
+     */
     private fun <T> onSuccess(requestType: RequestType, success: (T) -> Unit): (T) -> Unit {
         return {
             val status = if (it is List<*> && it.isEmpty()) {

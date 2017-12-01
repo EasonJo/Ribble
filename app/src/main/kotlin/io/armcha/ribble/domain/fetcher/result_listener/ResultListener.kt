@@ -7,6 +7,10 @@ interface ResultListener {
 
     fun onRequestStart(){}
 
+    /**
+     * 请求开始
+     * @param requestType [RequestType]
+     */
     fun onRequestStart(requestType: RequestType){}
 
     fun onRequestError(errorMessage: String?){}
